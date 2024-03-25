@@ -244,7 +244,7 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
 
   const user = await User.findById(res.user?._id);
-  //check password is correct using bcrypt 
+  //check password is correct using bcrypt
   const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
 
   if (!isPasswordCorrect) {
@@ -261,15 +261,13 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "PASSWORD CHANGED SUCCESSFULLY "));
 });
 
-
-
 //User can get curent user data only if he has logged in
 //Obviously the user object is  in the req.body since the
 // auth middleware is inserting it from the server. So just acccess it and print it down
 const getCurrentUser = asyncHandler(async (req, res) => {
   return res
     .status(200)
-    .json(new ApiResponse(200 , req.user , "FETCHED SUCCESSFULLY"));
+    .json(new ApiResponse(200, req.user, "FETCHED SUCCESSFULLY"));
 });
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
@@ -318,9 +316,9 @@ const updateUserAvater = asyncHandler(async (req, res) => {
     { new: true },
   ).select("-password");
 
-  return res.status(200).json(
-    new ApiResponse(200 , user , "coverimage updated successfully")
-  )
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "coverimage updated successfully"));
 });
 
 const updateUserCoverImage = asyncHandler(async (req, res) => {
@@ -336,7 +334,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     throw new ApiError(400, "error while uploading avatar");
   }
 
-  const user  = await User.findByIdAndUpdate(
+  const user = await User.findByIdAndUpdate(
     req.user?._id,
     {
       $set: {
@@ -346,9 +344,90 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     { new: true },
   ).select("-password");
 
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "coverimage updated successfully"));
+});
+
+const getUserChannelProfile = asyncHandler(async (req, res) => {
+  //user name is passed as params from frontend
+  const { username } = req.params;
+
+  if (!username?.trim()) {
+    throw new ApiError(400, "usrname is missing ");
+  }
+
+  //PIPELINES
+  const channel = await User.aggregate([
+    {
+      //find usr
+      $match: {
+        username: username?.toLowerCase(),
+      },
+    },
+    {
+      //find the user's subscribers
+      $lookup: {
+        from: "subscriptions",
+        localField: "_id",
+        foreignField: "channel",
+        as: "subscribers",
+      },
+    },
+    {
+      //find how manny channel user has subscribed to
+      $lookup: {
+        from: "subscriptions",
+        localField: "_id",
+        foreignField: "subscriber",
+        as: "subscribedTo",
+      },
+    },
+
+    {
+      //based on filtered data got through above pipelines , add new fields inside user document
+      //subscriber count and subscribed to count also , issubscribed
+      $addFields: {
+        subscriberCount: {
+          $size: "$subscribers",
+        },
+        channelSubscribedToCount: {
+          $size: "$subscribedTo",
+        },
+        isSubscribed: {
+          $cond: {
+            //go to subscribers object and find if req.user is in the  subscriber field
+            if: { $in: [req.user?._id, "$subscribers.subscriber"] },
+            then: true,
+            else: false,
+          },
+        },
+      },
+    },
+
+    //defines which all  fields of the result to display 
+    {
+      $project: {
+        fullName: 1,
+        username: 1,
+        subscriberCount: 1,
+        channelSubscribedToCount: 1,
+        isSubscribed: 1,
+        avatar: 1,
+        coverImage: 1,
+        email: 1,
+      },
+    },
+  ]);
+
+  if(!channel?.length){
+    throw new ApiError(404 , "channel does not exist")
+  }
+
   return res.status(200).json(
-    new ApiResponse(200 , user , "coverimage updated successfully")
+    new ApiResponse(200 , channel[0], "User channel fetched successfully ")
   )
+  // console.log(channel);
 });
 
 export {
@@ -360,5 +439,6 @@ export {
   getCurrentUser,
   updateAccountDetails,
   updateUserAvater,
-  updateUserCoverImage
+  updateUserCoverImage,
+  getUserChannelProfile,
 };
