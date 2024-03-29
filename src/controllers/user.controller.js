@@ -16,6 +16,7 @@ const generateAccessAndRefreshTokens = async (userId) => {
     // console.log(accessToken);
     // console.log("refreshToken :", refreshToken);
     user.refreshToken = refreshToken;
+    //skip validation
     await user.save({ validateBeforeSave: false });
 
     return { accessToken, refreshToken };
@@ -31,7 +32,7 @@ const generateAccessAndRefreshTokens = async (userId) => {
 const registerUser = asyncHandler(async (req, res) => {
   //access req.body
   const { fullName, email, username, password } = req.body;
-  console.log("email : ", email);
+  // console.log("email : ", email);
 
   //check each field seperatly
   // if (fullName === "") {
@@ -55,6 +56,7 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   //upload images....
+  console.log(req.files)
   const avatarLocalPath = req.files?.avatar[0]?.path;
   // const coverImageLocalPath = req.files?.coverImage[0]?.path;
 
@@ -110,7 +112,7 @@ const loginUser = asyncHandler(async (req, res) => {
   //3. token creation
   // 4. send response
   const { email, username, password } = req.body;
-  console.log(email);
+
 
   if (!username || !email) {
     throw new ApiError(400, "username or password is required");
@@ -145,8 +147,7 @@ const loginUser = asyncHandler(async (req, res) => {
     secure: true,
   };
 
-  console.log("just before return : ", accessToken);
-  console.log("just before return : ", refreshToken);
+
 
   return res
     .status(200)
@@ -195,19 +196,25 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   //access refreshtoken from the req body
   const incomingRefreshToken =
     req?.cookies.refreshToken || req?.body.refreshToken;
+  
+    // console.log(incomingRefreshToken)
 
   if (!incomingRefreshToken) {
     throw new ApiError(401, "UNAUTHORISED REQUEST");
   }
 
   try {
+    console.log(incomingRefreshToken)
     //verify refreshtoken using jwt
     const decodedToken = jwt.verify(
       incomingRefreshToken,
-      process.env.ACCESS_TOKEN_SECRET,
+      // process.env.ACCESS_TOKEN_SECRET,
+      "012345678901"
     );
 
+    console.log("decodedToken")
     const user = await User.findById(decodedToken?._id);
+    console.log("user")
 
     if (!user) {
       throw new ApiError(401, "INVALID REFRESH TOKEN ");
@@ -244,8 +251,11 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 const changeCurrentPassword = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
 
-  const user = await User.findById(res.user?._id);
+  // console.log(oldPassword)
+  // console.log(newPassword)
+  const user = await User.findById(req.user?._id);
   //check password is correct using bcrypt
+  console.log(user)
   const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
 
   if (!isPasswordCorrect) {
