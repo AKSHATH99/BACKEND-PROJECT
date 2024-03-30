@@ -251,11 +251,10 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 const changeCurrentPassword = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
 
-  // console.log(oldPassword)
-  // console.log(newPassword)
+  //use id from auth middleware and find user in db 
   const user = await User.findById(req.user?._id);
+
   //check password is correct using bcrypt
-  console.log(user)
   const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
 
   if (!isPasswordCorrect) {
@@ -264,8 +263,8 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 
   user.password = newPassword;
   await user.save({ validateBeforeSave: false });
-  //this will the pre function defined in the models , since the password is beiging changed
-  //that will automaticlly hash new passworkd
+  //this will the pre function defined in the models , since the password is being  changed
+  //that will automaticlly hash new password
 
   return res
     .status(200)
@@ -291,8 +290,8 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     req.user?._id,
     {
       $set: {
-        fullName,
-        email,
+        fullName:fullName,
+        email:email,
       },
     },
     //this will return updated data , user variable will store the new data then
@@ -448,7 +447,7 @@ const getWatchHistory = asyncHandler(async (req, res) => {
     {
       //retrive user
       $match: {
-        id: new mongoose.Types.ObjectId(req.user._id),
+        _id: new mongoose.Types.ObjectId(req.user._id),
       },
     },
     {
