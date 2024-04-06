@@ -32,4 +32,7 @@ app.use("/api/v1/health", healtherCheckRouter)
 import tweetRouter from "./routes/tweets.routes.js"
 app.use("/api/v1/tweets", tweetRouter)
 
+import videoRouter from "./routes/video.routes.js"
+app.use("/api/v1/videos", videoRouter) 
+
 export { app };
