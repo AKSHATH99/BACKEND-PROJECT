@@ -70,21 +70,110 @@ const publishAVideo = asyncHandler(async (req, res) => {
 
 const getVideoById = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
+
+  console.log(videoId)
+
+  const video = await Video.findById(videoId)
+
+  console.log(video)
+
+  res.status(200).json(new ApiResponse(200 , "fetched video successfully "))
   //TODO: get video by id
 });
 
+
+
 const updateVideo = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
+  const {title, description} = req.body
+
+  const video = await Video.findById(videoId)
+  const user  = req.user
+
+  if(!video){
+    throw new ApiError(500 , "VIDEO NOT FOUND ")
+  }
+
+  if(!user._id.equals(video.owner)){
+    throw new ApiError(400 , "YOU CANNOT PERFORM THIS OPERATION ")
+  }
+
+  const videoLocalPath = req.files.video[0].path
+  const thumbnailLocalPath = req.files.thumbnail[0].path
+
+  console.log(videoLocalPath)
+  console.log(thumbnailLocalPath)
+
+  const cloudvideo = await uploadOnCloudinary(videoLocalPath);
+  const cloudThumbnail = await uploadOnCloudinary(thumbnailLocalPath);
+
+  if(!cloudvideo){
+    throw new ApiError(400 , "SOME ERROR OCCURED WHILE UPLAODING TO CLOUDNARY - VIDEO")
+  }
+  if(!cloudThumbnail){
+    throw new ApiError(400 , "SOME ERROR OCCURED WHILE UPLAODING TO CLOUDNARY - thumbnail")
+  }
+
+  console.log(cloudThumbnail)
+  console.log(cloudvideo)
+  
+  video.title = title;
+  video.description = description;
+  video.videoFile = cloudvideo.url; // Assuming cloudVideo.url is the URL of the uploaded video
+  video.thumbnail = cloudThumbnail.url;
+  video.duration = video.duration;
+  await video.save();
+
+  res.status(200).json(new ApiResponse(200 , "updated video successfully "))
   //TODO: update video details like title, description, thumbnail
 });
 
+
+
+
 const deleteVideo = asyncHandler(async (req, res) => {
-  const { videoId } = req.params;
   //TODO: delete video
+  const { videoId } = req.params;
+
+  const user  = req.user
+  // console.log(videoId)
+
+  const video = await Video.findById(videoId)
+
+  console.log(video)
+  console.log(user._id)
+  console.log(video.owner)
+
+  //checks if the real owner is trying to delete video or not 
+  if(!user._id.equals(video.owner)){
+    console.log("NEE ALLA MYRA OWNER ")
+  }
+
+  const deletedVideo  = await Video.findByIdAndDelete(videoId)
+
+  if(!deletedVideo){
+    throw new ApiError(500 , "Not found")
+  }
+
+  res.status(200).json(new ApiResponse(200 , "deleted video successfully "))
 });
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
+
+  const video = await Video.findById(videoId)
+
+  if(!video){
+    throw new ApiError(500 , "VIDEO NOT FOUND ")
+  }
+
+  const toggledStatus  = await Video.findByIdAndUpdate(videoId, {isPublished:!video.isPublished})
+
+  if(!toggledStatus){
+    throw new ApiError(500 , "COULDNT TOGGLEE STATUS")
+  }
+  res.status(200).json(new ApiResponse(200 , "toggled successfully "))
+
 });
 
 export {
