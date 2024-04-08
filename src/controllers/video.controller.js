@@ -7,13 +7,46 @@ import asyncHandler from "../utils/asyncHandler.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 const getAllVideos = asyncHandler(async (req, res) => {
-  // const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
-  if (req) {
-    console.log("got request");
+  const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
+
+  // Constructing the filter object based on query parameters
+  const filter = {};
+  if (query) {
+    // Example: filtering by title or description
+    filter.$or = [
+      { title: { $regex: query, $options: 'i' } }, // Case-insensitive search
+      { description: { $regex: query, $options: 'i' } }
+    ];
+  }
+  if (userId) {
+    // Filtering by owner user ID
+    filter.owner = userId;
+  }
+  // Other possible filters can be added here based on your requirements
+
+  // Constructing the sort object based on sortBy and sortType
+  const sort = {};
+  if (sortBy) {
+    sort[sortBy] = sortType === 'desc' ? -1 : 1;
+  } else {
+    // Default sorting by createdAt in descending order
+    sort.createdAt = -1;
   }
 
-  res.status(200).json(new ApiResponse(200, "success"));
-  //TODO: get all videos based on query, sort, pagination
+  try {
+    const videos = await Video.aggregatePaginate([], {
+      // Using aggregatePaginate for pagination
+      page: parseInt(page),
+      limit: parseInt(limit),
+      sort: sort,
+      customLabels: { docs: 'videos' } // Renaming the response field 'docs' to 'videos'
+    });
+
+    res.status(200).json(new ApiResponse(200, 'success', videos));
+  } catch (error) {
+    console.error(error);
+    res.status(500).json(new ApiResponse(500, 'error', null, 'Internal Server Error'));
+  }
 });
 
 const publishAVideo = asyncHandler(async (req, res) => {
@@ -81,8 +114,6 @@ const getVideoById = asyncHandler(async (req, res) => {
   //TODO: get video by id
 });
 
-
-
 const updateVideo = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
   const {title, description} = req.body
@@ -127,8 +158,6 @@ const updateVideo = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponse(200 , "updated video successfully "))
   //TODO: update video details like title, description, thumbnail
 });
-
-
 
 
 const deleteVideo = asyncHandler(async (req, res) => {
