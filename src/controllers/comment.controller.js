@@ -13,7 +13,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
     const comments = await Comment.find({video : id});
 
     if(!comments){
-        throw new ApiError(400 , "NO COMMENTS ")
+        throw new ApiError(400 , "NO COMMENTS " )
     }
 
     res.status(200).json(new ApiResponse(400 , "comments fetched successfully " , comments))
