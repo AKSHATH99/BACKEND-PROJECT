@@ -30,13 +30,13 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
 
     const user = await User.findById(id)
     if(!user){
-        throw new ApiError(200 , "USER NOT FOUND")
+        throw new ApiError(404 , "USER NOT FOUND")
     }
 
     const playlist =  await Playlist.find({owner : id})
 
     if(!playlist){
-        throw new ApiError(400 , "CANNOT FETCH PLAYLIST")
+        throw new ApiError(404 , "CANNOT FETCH PLAYLIST")
     }
 
     res.status(200).json(new ApiResponse(200 , "fetched successfully" , playlist))
@@ -65,14 +65,14 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
     const playlist = await Playlist.findById(playlistId);
 
     if (!playlist) {
-       throw new ApiError(400 , "PLAYLIST NOT FOUND ")
+       throw new ApiError(404 , "PLAYLIST NOT FOUND ")
     }
 
     playlist.videos.push(videoId);
     const newVideo = await playlist.save();
 
     if(!newVideo){
-        throw new ApiError(400 , "ERROR WHILE ADDING VIDEO ")
+        throw new ApiError(500 , "ERROR WHILE ADDING VIDEO ")
     }
     
     res.status(200).json(new ApiResponse(200 , "SUCCESSFULLY ADDED VIDEO "));
@@ -85,7 +85,7 @@ const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
     const playlist = await Playlist.findById(playlistId);
 
     if (!playlist) {
-       throw new ApiError(400 , "PLAYLIST NOT FOUND ")
+       throw new ApiError(404 , "PLAYLIST NOT FOUND ")
     }
 
     //remove the video from the fetched playlist , then add that to db
@@ -93,7 +93,7 @@ const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
     const newVideo = await playlist.save();
 
     if(!newVideo){
-        throw new ApiError(400 , "ERROR WHILE DELETTING VIDEO ")
+        throw new ApiError(500 , "ERROR WHILE DELETTING VIDEO ")
     }
     
     res.status(200).json(new ApiResponse(200 , "SUCCESSFULLY DELETED VIDEO "));
@@ -109,7 +109,7 @@ const deletePlaylist = asyncHandler(async (req, res) => {
     const playlist =  await Playlist.findByIdAndDelete(playlistId)
 
     if(!playlist){
-        throw new ApiError(400 , "PLAYLIST DOES NOT EXIST ")
+        throw new ApiError(404 , "PLAYLIST DOES NOT EXIST ")
     }
 
     res.status(200).json(new ApiResponse(200 , "deleted successfully" , playlist))
@@ -123,13 +123,13 @@ const updatePlaylist = asyncHandler(async (req, res) => {
     const playlist = await Playlist.findById(playlistId)
 
     if(!playlist){
-        throw new ApiError(400 , "COULDNT FIND THE PLAYLIST")
+        throw new ApiError(404 , "COULDNT FIND THE PLAYLIST")
     }
 
     const updatedPl = await Playlist.findByIdAndUpdate({ name : name , description: description})
 
     if(!updatedPl){
-        throw new ApiError(400 , "SOMETHIGN OCCURED WHILE UPDATING ")
+        throw new ApiError(500 , "SOME ERROR  OCCURED WHILE UPDATING ")
     }
 
     res.status(200).ApiResponse(200 , "UPDATED SUCCESSFULLY ")

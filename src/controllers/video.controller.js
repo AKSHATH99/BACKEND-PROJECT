@@ -60,20 +60,20 @@ const publishAVideo = asyncHandler(async (req, res) => {
   console.log(thumbnailLocalPath)
 
   if (!videoLocalPath) {
-    throw new ApiError(400, "VIDEO FILE IS REQUIRED");
+    throw new ApiError(422, "VIDEO FILE IS REQUIRED");
   }
   if(!thumbnailLocalPath){
-    throw new ApiError(400 , "THUMBNAIL FILE IS REQUIRED")
+    throw new ApiError(422 , "THUMBNAIL FILE IS REQUIRED")
   }
 
   const video =  await uploadOnCloudinary(videoLocalPath)
   const thumbnail = await uploadOnCloudinary(thumbnailLocalPath)
 
   if(!video){
-    throw new ApiError(404 , "SOMETHING WENT WRONG WHILE UPLOADING TO CLOUDINARY ")
+    throw new ApiError(500 , "SOMETHING WENT WRONG WHILE UPLOADING TO CLOUDINARY ")
   }
   if(!thumbnail){
-    throw new ApiError(404 , "SOMETHING WENT WRONG WHILE UPLOADING TO CLOUNDINARY (THUMBNAIL)")
+    throw new ApiError(500 , "SOMETHING WENT WRONG WHILE UPLOADING TO CLOUNDINARY (THUMBNAIL)")
   }
 
   console.log(video.url)
@@ -100,7 +100,6 @@ const publishAVideo = asyncHandler(async (req, res) => {
 
   res.status(200).json(new ApiResponse(200, "upload succesfull "));
 });
-
 const getVideoById = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
 
@@ -122,8 +121,8 @@ const updateVideo = asyncHandler(async (req, res) => {
   const user  = req.user
 
   if(!video){
-    throw new ApiError(500 , "VIDEO NOT FOUND ")
-  }
+    throw new ApiError(404 , "VIDEO NOT FOUND ")
+  } 
 
   if(!user._id.equals(video.owner)){
     throw new ApiError(400 , "YOU CANNOT PERFORM THIS OPERATION ")
@@ -139,10 +138,10 @@ const updateVideo = asyncHandler(async (req, res) => {
   const cloudThumbnail = await uploadOnCloudinary(thumbnailLocalPath);
 
   if(!cloudvideo){
-    throw new ApiError(400 , "SOME ERROR OCCURED WHILE UPLAODING TO CLOUDNARY - VIDEO")
+    throw new ApiError(500 , "SOME ERROR OCCURED WHILE UPLAODING TO CLOUDNARY - VIDEO")
   }
   if(!cloudThumbnail){
-    throw new ApiError(400 , "SOME ERROR OCCURED WHILE UPLAODING TO CLOUDNARY - thumbnail")
+    throw new ApiError(500 , "SOME ERROR OCCURED WHILE UPLAODING TO CLOUDNARY - thumbnail")
   }
 
   console.log(cloudThumbnail)
@@ -181,7 +180,7 @@ const deleteVideo = asyncHandler(async (req, res) => {
   const deletedVideo  = await Video.findByIdAndDelete(videoId)
 
   if(!deletedVideo){
-    throw new ApiError(500 , "Not found")
+    throw new ApiError(404 , "Not found")
   }
 
   res.status(200).json(new ApiResponse(200 , "deleted video successfully "))
@@ -193,7 +192,7 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
   const video = await Video.findById(videoId)
 
   if(!video){
-    throw new ApiError(500 , "VIDEO NOT FOUND ")
+    throw new ApiError(404 , "VIDEO NOT FOUND ")
   }
 
   const toggledStatus  = await Video.findByIdAndUpdate(videoId, {isPublished:!video.isPublished})

@@ -13,7 +13,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
     const comments = await Comment.find({video : id});
 
     if(!comments){
-        throw new ApiError(400 , "NO COMMENTS " )
+        throw new ApiError(404 , "NO COMMENTS " )
     }
 
     res.status(200).json(new ApiResponse(400 , "comments fetched successfully " , comments))
@@ -30,7 +30,7 @@ const addComment = asyncHandler(async (req, res) => {
     const video = Video.findById(videoId);
 
     if(!video){
-        throw new ApiError(400  ,"VIDEO DOES NOT EXIST ")
+        throw new ApiError(404  ,"VIDEO DOES NOT EXIST ")
     }
 
     const newComment = new Comment({
@@ -56,7 +56,7 @@ const updateComment = asyncHandler(async (req, res) => {
     const updatedComment = await Comment.findByIdAndUpdate(commentId , {content : newComment})
 
     if(!updatedComment){
-        throw new ApiError(400  , "comment couldnt be updated ")
+        throw new ApiError(500  , "comment couldnt be updated ")
 
     }
     res.status(400).json(new ApiResponse(200 , "COMMENT UPDATED SUCCESSFULLY "))
@@ -69,7 +69,7 @@ const deleteComment = asyncHandler(async (req, res) => {
     const deletedComment = await Comment.findByIdAndDelete(id)
 
     if(!deletedComment){
-        throw new ApiError(400  , "comment couldnt be deleted ")
+        throw new ApiError(500  , "comment couldnt be deleted ")
 
     }
     res.status(400).json(new ApiResponse(200 , "COMMENT DELETED SUCCESSFULLY "))
