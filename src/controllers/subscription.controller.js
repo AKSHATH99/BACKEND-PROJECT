@@ -8,12 +8,28 @@ import {asyncHandler} from "../utils/asyncHandler.js"
 
 const toggleSubscription = asyncHandler(async (req, res) => {
     const {channelId} = req.params
-    // TODO: toggle subscription
+    
+    const channel = await User.findById(channelId)
+
+    if(!channel){
+        throw new ApiError(400 , "CHANNEL NOT FOUND")
+    }
+
+    const channelInDB = await Subscription.findById(channelId);
 })  
 
 // controller to return subscriber list of a channel
 const getUserChannelSubscribers = asyncHandler(async (req, res) => {
     const {channelId} = req.params
+
+    const subscribers = Subscription.findById(channelId);
+
+    if(!subscribers){
+        res.status(400).json(new ApiResponse(400 , "NO SUBSCRIBERS YET"))
+    }
+
+    res.status(400).json(new ApiResponse(400 , "FETCHED SUBSCRIBERS" , subscribers))
+
 })
 
 // controller to return channel list to which user has subscribed
