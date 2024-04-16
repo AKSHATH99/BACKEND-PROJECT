@@ -1,12 +1,12 @@
 import asyncHandler from "../utils/asyncHandler.js";
-import { ApiError } from "../utils/ApiError.js";
+import { ApiError } from "../utils/apiError.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
-import { ApiResponse } from "../utils/ApiResponse.js";
+import { ApiResponse } from "../utils/apiResponse.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 
-//generates refresh and access tokens using the user id
+//---------------------generates refresh and access tokens using the user id--------------------------------
 const generateAccessAndRefreshTokens = async (userId) => {
   try {
     const user = await User.findById(userId);
@@ -28,7 +28,7 @@ const generateAccessAndRefreshTokens = async (userId) => {
   }
 };
 
-//register user
+//---------------------generates refresh and access tokens using the user id--------------------------------
 const registerUser = asyncHandler(async (req, res) => {
   //access req.body
   const { fullName, email, username, password } = req.body;
