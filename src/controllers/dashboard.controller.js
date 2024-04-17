@@ -6,11 +6,14 @@ import { ApiError } from "../utils/apiError.js";
 import { ApiResponse } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
-
+//---------------------GET CHANNEL STATUS-------------------------------------------
 const getChannelStats = asyncHandler(async (req, res) => {
   // TODO: Get the channel stats like total video views, total subscribers, total videos, total likes etc.
+
+  //array to hold all the data
   let channelStats = [];
 
+  //........................Subscriber Count......................... 
   const subscriberCount = await Subscription.find({ channel: req.user._id });
   if (!subscriberCount) {
     throw new ApiError(404, "CHANNEL NOT FOUND");

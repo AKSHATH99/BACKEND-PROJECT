@@ -127,13 +127,16 @@ const deletePlaylist = asyncHandler(async (req, res) => {
     res.status(200).json(new ApiResponse(200 , "deleted successfully" , playlist))
 })
 
-//-------------------------------UPDATE PLAYLIST
+//-------------------------------UPDATE PLAYLIST--------------------------------------------------
 const updatePlaylist = asyncHandler(async (req, res) => {
     //TODO: update playlist
     const {playlistId} = req.params
     const {name, description} = req.body
     if(!playlistId){
         throw new ApiError(204 , " Didnt get id from params")
+    }
+    if(!(name || description)){
+        throw new ApiError(204 , "Name and description should be included")
     }
 
     const playlist = await Playlist.findById(playlistId)
