@@ -41,11 +41,11 @@ import playlistRouter from "./routes/playlist.routes.js"
 app.use("/api/v1/playlist", playlistRouter)
 
 import subscriptionRouter from "./routes/subscription.routes.js"
-app.use("/subscription", subscriptionRouter)
+app.use("/api/v1/subscription", subscriptionRouter)
 
 import likeRouter from "./routes/like.routes.js"
-app.use("/performLike", likeRouter)
+app.use("/api/v1/performLike", likeRouter)
 
 import dashboardRouter from "./routes/dashboard.router.js"
-app.use("/userDashboard", dashboardRouter)
+app.use("/api/v1/userDashboard", dashboardRouter)
 export { app };
