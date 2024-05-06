@@ -106,6 +106,8 @@ const registerUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, createdUser, "User registered Successfully"));
 });
 
+
+//--------------------------------------LOGIN USER------------------------------------------------------------------
 const loginUser = asyncHandler(async (req, res) => {
   //1. find user from db
   //2. passsword verify
@@ -166,6 +168,8 @@ const loginUser = asyncHandler(async (req, res) => {
     );
 });
 
+
+//--------------------------------------LOGOUT USER------------------------------------------------------------------
 const logoutUser = asyncHandler(async (req, res) => {
   //empty the refeshToken field
   await User.findByIdAndUpdate(
@@ -193,6 +197,8 @@ const logoutUser = asyncHandler(async (req, res) => {
 });
 //now if user have to login , he need to enter the credentials again as the refreshtoken is not in db
 
+
+//--------------------------------------REFRESH ACCESS TOKEN ------------------------------------------------------------------
 const refreshAccessToken = asyncHandler(async (req, res) => {
   //access refreshtoken from the req body
   const incomingRefreshToken =
@@ -249,6 +255,8 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   }
 });
 
+
+//--------------------------------------CHANGE PASSWORD------------------------------------------------------------------
 const changeCurrentPassword = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
 
@@ -272,6 +280,8 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "PASSWORD CHANGED SUCCESSFULLY "));
 });
 
+
+//-------------------------------------- USER INFO FETCH------------------------------------------------------------------
 //User can get curent user data only if he has logged in
 //Obviously the user object is  in the req.body since the
 // auth middleware is inserting it from the server. So just acccess it and print it down
@@ -281,6 +291,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, req.user, "FETCHED SUCCESSFULLY"));
 });
 
+//--------------------------------------UPDATE USER DETAILS------------------------------------------------------------------
 const updateAccountDetails = asyncHandler(async (req, res) => {
   const { fullName, email } = req.body;
   if (!fullName || !email) {
@@ -304,6 +315,8 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, "ACOUNT DETAILS UPDATED SUCCESSFULLY"));
 });
 
+
+//--------------------------------------UPDATE USER AVATER------------------------------------------------------------------
 const updateUserAvater = asyncHandler(async (req, res) => {
   const avatarLocalPath = req.file?.path;
 
@@ -332,6 +345,8 @@ const updateUserAvater = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, user, "coverimage updated successfully"));
 });
 
+
+//--------------------------------------UPDATE  USER COVER IMAGE------------------------------------------------------------------
 const updateUserCoverImage = asyncHandler(async (req, res) => {
   const coverImageLocalPath = req.file?.path;
 
@@ -360,6 +375,8 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, user, "coverimage updated successfully"));
 });
 
+
+//--------------------------------------GET CHANNEL------------------------------------------------------------------
 const getUserChannelProfile = asyncHandler(async (req, res) => {
   //user name is passed as params from frontend
   const { username } = req.params;
@@ -443,6 +460,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
   // console.log(channel);
 });
 
+//--------------------------------------WATCH HISTORY------------------------------------------------------------------
 const getWatchHistory = asyncHandler(async (req, res) => {
   const user = await User.aggregate([
     {
